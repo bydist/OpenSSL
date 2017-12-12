@@ -4,7 +4,7 @@ set(version 1.0.2l)
 byd__package__info(${package}
     MAINTAINER_NAME "David Callu"
     MAINTAINER_EMAIL "callu.david@gmail.com"
-    VERSION ${version}-1
+    VERSION ${version}-2
     ABI ${version}
     )
 
