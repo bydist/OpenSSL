@@ -14,7 +14,7 @@ byd__openssl__generate_configure_command(${package})
 byd__openssl__generate_build_command(${package})
 byd__openssl__generate_install_command(${package})
 
-if(BUYILD_TESTING)
+if(BUILD_TESTING)
     byd__openssl__generate_test_command(${package})
 endif()
 
