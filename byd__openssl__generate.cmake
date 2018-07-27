@@ -71,31 +71,23 @@ function(byd__openssl__generate_configure_command package)
     endif()
 
 
-    if(BUILD_SHARED_LIBS AND NOT WIN32)
+    if(BUILD_SHARED_LIBS)
         list(APPEND configure_args "shared")
     else()
         list(APPEND configure_args "no-shared")
     endif()
 
 
-    if(BYD__zlib)
-        if(BUILD_SHARED_LIBS)
-            list(APPEND configure_args "zlib-dynamic")
-        else()
-            list(APPEND configure_args "zlib")
-        endif()
-        if(CMAKE_INSTALL_PREFIX)
-            list(APPEND configure_args "--with-zlib-include=${CMAKE_INSTALL_PREFIX}/include")
-            list(APPEND configure_args "--with-zlib-lib=${CMAKE_INSTALL_PREFIX}/lib")
-        endif()
-    else()
-        list(APPEND configure_args "no-zlib")
-    endif()
+	list(APPEND configure_args "zlib")
+	if(CMAKE_INSTALL_PREFIX)
+		list(APPEND configure_args "--with-zlib-include=${CMAKE_INSTALL_PREFIX}/include")
 
-
-    if(WIN32 AND MSVC)
-        list(APPEND configure_args "no-asm")
-    endif()
+		set(zlib_option_path "${CMAKE_INSTALL_PREFIX}/lib")
+		if(WIN32)
+			set(zlib_option_path "${zlib_option_path}/zdll.lib")
+		endif()
+		list(APPEND configure_args "--with-zlib-lib=${zlib_option_path}")
+	endif()
 
 
     set(command "perl" "Configure" "${configure_args}")
@@ -104,9 +96,6 @@ function(byd__openssl__generate_configure_command package)
 
     byd__script__begin("${script_dir}/configure.cmake")
         byd__script__command("${command}")
-        if(WIN32 AND MSVC)
-            byd__script__command("${source_dir}/ms/do_ms.bat")
-        endif()
     byd__script__end()
 
 
@@ -129,7 +118,7 @@ function(byd__openssl__generate_build_command package)
         byd__private__get_num_core_available(num_core)
         set(command make -j${num_core})
     elseif(WIN32 AND MSVC)
-        set(command nmake -f "${source_dir}/ms/ntdll.mak")
+        set(command nmake)
     endif()
 
     byd__script__begin("${script_dir}/build.cmake")
@@ -157,7 +146,7 @@ function(byd__openssl__generate_install_command package)
         byd__private__get_num_core_available(num_core)
         set(command make install_sw -j${num_core})
     elseif(WIN32 AND MSVC)
-        set(command nmake -f "${source_dir}/ms/ntdll.mak" install)
+        set(command nmake install_sw)
     endif()
 
 
@@ -186,7 +175,7 @@ function(byd__openssl__generate_test_command package)
         # disable -j option ==>> fail the test
         set(command make test)
     elseif(WIN32 AND MSVC)
-        set(command nmake -f "${source_dir}/ms/ntdll.mak" test)
+        set(command nmake test)
     endif()
 
 
